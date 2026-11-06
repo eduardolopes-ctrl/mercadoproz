@@ -7,8 +7,16 @@ formCadastro.onsubmit = (event) => {
     event.preventDefault()
     // 1 - Pegar os valores digitados na tela e colocar em variaveis
     const nomeProdutoDigitado = document.getElementById("nome").value
-    const precoProdutoDigitado = Number(document.getElementById("preco").value)
+    const campoPreco = document.getElementById("preco")
+    campoPreco.setCustomValidity("")
+    const precoProdutoDigitado = Number(campoPreco.value.trim().replace(",", "."))
     const categoriaProdutoDigitado = document.getElementById("categoria").value
+
+    if (!Number.isFinite(precoProdutoDigitado) || precoProdutoDigitado < 0) {
+        campoPreco.setCustomValidity("Informe um preço válido, maior ou igual a zero.")
+        campoPreco.reportValidity()
+        return
+    }
 
     // 2 - Criar um objeto com esses valores
     const produto = {
@@ -45,11 +53,15 @@ const listaProdutos = document.getElementById("itens")
 // "" aspas duplas
 // `` crase ${variavel}
 listaProdutos.innerHTML = 
-produtosLocalStorage.map((produto, index) => `
+produtosLocalStorage.map((produto, index) => {
+    const preco = Number(produto.preco)
+    const precoExibido = Number.isFinite(preco) ? preco.toFixed(2) : "Preço inválido"
+
+    return `
     <tr>
         <td>${index}</td>
         <td>${produto.nome}</td>
-        <td>R$ ${produto.preco.toFixed(2)}</td>
+        <td>R$ ${precoExibido}</td>
         <td>${produto.categoria}</td>
         <td>
             <button class="btn btn-danger btn-sm"
@@ -63,7 +75,8 @@ produtosLocalStorage.map((produto, index) => `
             </button>
         </td>
     </tr>
-`).join("")
+`
+}).join("")
 
 
 function excluirProduto(index) {
